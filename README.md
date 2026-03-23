@@ -1,4 +1,4 @@
-# # AutoServicio: Plataforma de Aprovisionamiento Automatizado sobre Proxmox VE
+# AutoServicio: Plataforma de Aprovisionamiento Automatizado sobre Proxmox VE
 
 **Proyecto Final del Ciclo Formativo de Grado Superior en Administración de Sistemas Informáticos en Red (ASIR)**
 
