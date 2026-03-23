@@ -39,7 +39,7 @@ Actuando como un panel de control centralizado (Frontend web) y conectándose na
 * **Librerías:** `proxmoxer` (API Proxmox), `paramiko` (Conexiones SSH), `pymysql` o `SQLAlchemy` (Base de datos).
 
 ### Frontend
-* **HTML5, CSS3, JavaScript**
+* **HTML5, CSS3**
 * **Bootstrap 5 / AdminLTE:** Diseño responsive y panel de administración.
 * **Jinja2:** Motor de renderizado de plantillas.
 
