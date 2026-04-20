@@ -59,11 +59,16 @@ Actuando como un panel de control centralizado (Frontend web) y conectándose na
 ## Estructura del Repositorio
 
 ```text
-/
-├── app.py                  # Archivo principal de Python/Flask
-├── static/                 # Archivos estáticos (CSS, JS, imágenes)
-├── templates/              # Plantillas HTML (Jinja2)
-├── scripts_config/         # Scripts en Bash para inyectar a los contenedores
-├── database/               # Esquema SQL y scripts de creación de BD
-├── docs/                   # Documentación extra y capturas de pantalla
-└── README.md               # Este archivo
+/opt/autoservicio/
+├── venv/                 
+├── .env                  
+├── app.py                
+├── database.py           
+├── proxmox_utils.py      
+├── ssh_utils.py          
+├── templates/            
+│   ├── base.html         
+│   └── index.html        
+└── static/              
+    ├── css/             
+    └── img/
