@@ -1,0 +1,44 @@
+body {
+    background-color: #f4f6f9;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.barra-navegacion {
+    background-color: #212529;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.tarjeta-animada {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 12px;
+    border: none;
+}
+.tarjeta-animada:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 25px rgba(0,0,0,0.15) !important;
+}
+
+.caja-formulario {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+.etiqueta-negrita {
+    font-weight: 600;
+    color: #495057;
+}
+.boton-principal {
+    border-radius: 8px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+.pantalla-centrada {
+    display: flex;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.contenedor-acceso {
+    width: 100%;
+    max-width: 400px;
+    padding: 15px;
+    margin: auto;
+}

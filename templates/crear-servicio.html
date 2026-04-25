@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuevo Despliegue - AutoServicio</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/estilos.css') }}" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-dark barra-navegacion">
+        <div class="container-fluid px-4">
+            <span class="navbar-brand mb-0 h1">Asistente de Despliegue</span>
+            <a href="/dashboard" class="btn btn-outline-light btn-sm">Volver al Panel</a>
+        </div>
+    </nav>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card caja-formulario">
+                    <div class="card-body p-5">
+                        <h3 class="mb-4 text-primary">Parametros de la Maquina</h3>
+                        <form action="/crear_servicio" method="POST">
+                            <div class="row mb-4">
+                                <div class="col-md-8">
+                                    <label class="form-label etiqueta-negrita">Nombre del Equipo</label>
+                                    <input type="text" name="nombre_contenedor" class="form-control" placeholder="Ej: web-principal" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label etiqueta-negrita">Identificador (ID)</label>
+                                    <input type="number" name="vmid" class="form-control" placeholder="Ej: 210" min="100" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-5">
+                                <label class="form-label etiqueta-negrita">Rol del Servidor</label>
+                                <select name="servicio" class="form-select" required>
+                                    <option value="" disabled selected>Selecciona el software a instalar...</option>
+                                    <option value="web">ð Servidor Web</option>
+                                    <option value="dns"> DNS </option>
+                                    <option value="dhcp">ðDHCP</option>
+			 	    <option value="pi-hole">pi-hole</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-lg w-100 boton-principal">
+                                Ordenar Despliegue a Proxmox
+                            </button>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
