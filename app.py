@@ -19,6 +19,6 @@ def dashboard():
     return render_template('dashboard.html')
 @app.route('/crear_servicio')
 def crear_servicio():
-	return render_template('crear_servicio.html')
+    return render_template('crear_servicio.html')
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuracion de Servicios - AutoServicio</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/estilos.css') }}" rel="stylesheet">
+</head>
+<body>
+
+    <nav class="navbar navbar-dark barra-navegacion">
+        <div class="container-fluid px-4">
+            <span class="navbar-brand mb-0 h1">SOLICITUD DE SERVICIOS</span>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light btn-sm">Volver al Panel</a>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-4 mt-5">
+        <div class="row g-4 justify-content-center">
+            
+            <div class="col-md-4">
+                <div class="card caja-formulario h-100 border-primary">
+                    <div class="card-header bg-primary text-white text-center fw-bold">CONFIGURACION DHCP</div>
+                    <div class="card-body">
+                        <form action="/crear_servicio" method="POST">
+                            <input type="hidden" name="servicio" value="dhcp">
+                            <div class="mb-2">
+                                <label class="form-label etiqueta-negrita small">Rango Inicio</label>
+                                <input type="text" name="dhcp_inicio" class="form-control form-control-sm" placeholder="192.168.1.100" required>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label etiqueta-negrita small">Rango Fin</label>
+                                <input type="text" name="dhcp_fin" class="form-control form-control-sm" placeholder="192.168.1.200" required>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label etiqueta-negrita small">Mascara de Red</label>
+                                <input type="text" name="dhcp_mascara" class="form-control form-control-sm" value="255.255.255.0">
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label etiqueta-negrita small">Puerta de Enlace</label>
+                                <input type="text" name="dhcp_gateway" class="form-control form-control-sm" placeholder="192.168.1.1" required>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label etiqueta-negrita small">Servidores DNS</label>
+                                <input type="text" name="dhcp_dns" class="form-control form-control-sm" value="8.8.8.8, 1.1.1.1">
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label etiqueta-negrita small">Tiempo de Concesion (seg)</label>
+                                <input type="number" name="dhcp_lease" class="form-control form-control-sm" value="86400">
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 boton-principal">Desplegar DHCP</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card caja-formulario h-100 border-success">
+                    <div class="card-header bg-success text-white text-center fw-bold">CONFIGURACION DNS</div>
+                    <div class="card-body">
+                        <form action="/crear_servicio" method="POST">
+                            <input type="hidden" name="servicio" value="dns">
+                            <div class="mb-2">
+                                <label class="form-label etiqueta-negrita small">Zona de Dominio</label>
+                                <input type="text" name="dns_zona" class="form-control form-control-sm" placeholder="proyecto.asir" required>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label etiqueta-negrita small">Nombre del Host</label>
+                                <input type="text" name="dns_host" class="form-control form-control-sm" placeholder="www" required>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label etiqueta-negrita small">Tipo de Registro</label>
+                                <select name="dns_tipo" class="form-select form-select-sm">
+                                    <option value="A">A (Direccion IPv4)</option>
+                                    <option value="CNAME">CNAME (Alias)</option>
+                                    <option value="MX">MX (Correo)</option>
+                                </select>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label etiqueta-negrita small">Valor / Destino</label>
+                                <input type="text" name="dns_valor" class="form-control form-control-sm" placeholder="192.168.1.50" required>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label etiqueta-negrita small">TTL (Segundos)</label>
+                                <input type="number" name="dns_ttl" class="form-control form-control-sm" value="3600">
+                            </div>
+                            <button type="submit" class="btn btn-success w-100 boton-principal">Desplegar DNS</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card caja-formulario h-100 border-dark">
+                    <div class="card-header bg-dark text-white text-center fw-bold">DESPLIEGUE WEB APACHE</div>
+                    <div class="card-body">
+                        <form action="/crear_servicio" method="POST" enctype="multipart/form-data">
+                            <input type="hidden" name="servicio" value="web">
+                            
+                            <div class="mb-4">
+                                <label class="form-label etiqueta-negrita small">Fichero HTML (index.html)</label>
+                                <input type="file" name="fichero_html" class="form-control form-control-sm" accept=".html" required>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label etiqueta-negrita small">Fichero CSS (estilos.css)</label>
+                                <input type="file" name="fichero_css" class="form-control form-control-sm" accept=".css">
+                                <div class="form-text small">Opcional. Se enlazara automaticamente.</div>
+                            </div>
+
+                            <div class="alert alert-info small">
+                                El sistema generara automaticamente el VirtualHost en Apache y asignara una IP disponible.
+                            </div>
+
+                            <button type="submit" class="btn btn-dark w-100 boton-principal">Subir y Desplegar Web</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>
