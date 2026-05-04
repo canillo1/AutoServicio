@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - AutoServicio</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/estilos.css') }}" rel="stylesheet">
+</head>
+<body class="pantalla-centrada">
+
+    <main class="contenedor-acceso">
+        <div class="card shadow-sm caja-formulario border-primary">
+            <div class="card-body p-4">
+                <h2 class="text-center mb-3 text-primary">Nuevo Usuario</h2>
+                <p class="text-muted text-center mb-4">Crea tu cuenta de AutoServicio</p>
+                {% if mensaje_error %}
+                <div class="alert alert-danger py-2 text-center small" role="alert">
+                    {{ mensaje_error }}
+                </div>
+                {% endif %}
+                <form action="/registro" method="POST">
+                    <div class="mb-3">
+                        <label for="usuario" class="form-label etiqueta-negrita">Nombre de Usuario</label>
+                        <input type="text" name="username" class="form-control" id="usuario" placeholder="Ej: a.martinez" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="contrasena" class="form-label etiqueta-negrita">Contrasenia</label>
+                        <input type="password" name="password" class="form-control" id="contrasena" placeholder="Crea una clave segura" required minlength="4">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 boton-principal mb-3">
+                        Registrarme
+                    </button>
+                    <div class="text-center mt-3">
+                        <a href="/login" class="text-decoration-none small text-muted">Ya tienes cuenta? Inicia sesion aquií</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
