@@ -50,10 +50,8 @@ Actuando como un panel de control centralizado (Frontend web) y conectándose na
 
 ## Material Multimedia y Entregas (Checkpoints)
 
-* **Checkpoint 1 (Revisión Inicial):** [Enlace al vídeo explicativo](#) *(<-- Se añadirá cuando se requiera)*
-* **Exposición Final:** [Enlace al vídeo final de 10 min](#) *(<-- Se añadirá para la presentación)*
-* **Tutorial de Uso:** *(Se detallará en este repositorio al finalizar el desarrollo)*
-
+* **Checkpoint 1 (Revisión Inicial):** [Enlace al vídeo explicativo](https://drive.google.com/file/d/1dE1jUnHEGykeotOIbDYoQxmDQpUzn3dN/view?usp=sharing) 
+* **Documentacion (DRIVE)**[ENLACE DOCUMENTACION](https://docs.google.com/document/d/1da0W1-blvOcRLr9vKXel3__spJxI8hNTmVWjxqUPbpA/edit?usp=drive_link)
 ---
 
 ## Estructura del Repositorio
