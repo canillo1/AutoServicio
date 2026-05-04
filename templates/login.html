@@ -9,7 +9,7 @@
 </head>
 <body class="pantalla-centrada">
     <main class="contenedor-acceso">
-        <div class="card shadow-sm caja-formulario">
+        <div class="card shadow-sm caja-formulario border-primary">
             <div class="card-body p-4">
                 <h2 class="text-center mb-3 text-primary">AutoServicio</h2>
                 <p class="text-muted text-center mb-4">Elige la opcion que quieras</p>
@@ -22,10 +22,15 @@
                         <label for="contrasena" class="form-label etiqueta-negrita">Contrasenia</label>
                         <input type="password" name="password" class="form-control" id="contrasena" placeholder="Tu clave de acceso" required>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100 boton-principal">
+                    
+                    <button type="submit" class="btn btn-primary w-100 boton-principal mb-3">
                         Entrar al Sistema
                     </button>
-                </form>         
+                    <div class="text-center mt-3">
+                        <a href="/registro" class="text-decoration-none small text-muted">¿No tienes cuenta? Registrate aqui</a>
+                    </div>
+                    
+                </form>
             </div>
         </div>
     </main>

@@ -19,7 +19,7 @@ class Usuario(db.Model):
     __tablename__ = 'usuarios'
     id_usuario = db.Column(db.Integer, primary_key=True, autoincrement=True)
     nombre_usuario = db.Column(db.String(45))
-    password_hash = db.Column(db.String(120))
+    password_hash = db.Column(db.String(255))
     rol = db.Column(db.String(20))
     activo = db.Column(db.Boolean, default=True)
     despliegues = db.relationship('RegistroDespliegue', backref='creador', lazy=True)
