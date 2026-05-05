@@ -10,7 +10,10 @@
 <body>
     <nav class="navbar navbar-dark bg-dark shadow-sm">
         <div class="container-fluid px-4">
-            <a href="/login" class="btn btn-outline-light btn-sm">Cerrar Sesion</a>
+	    <span class="navbar-text text-white">
+	    Usuario: <strong>{{session.nombre_usuario}}</strong>
+	    </span>
+            <a href="/logout" class="btn btn-outline-light btn-sm">Cerrar Sesion</a>
         </div>
     </nav>
     <div class="container mt-5">

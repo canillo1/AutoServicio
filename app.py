@@ -26,7 +26,17 @@ def login():
     return render_template('login.html')
 @app.route('/dashboard')
 def dashboard():
-    return render_template('dashboard.html')
+    if 'nombre_usuario' not in session:
+        return redirect(url_for('login'))
+   #Vamos a validar que el usuario este en la base de datos.
+    nombre_sesion = session['nombre_usuario']
+    usuario_validado = Usuario.query.filter_by(nombre_usuario=nombre_sesion).first()
+   #Si no borramos la session pues puede ser falsa o estar obsoleta:
+    if not usuario_validado:
+        session.clear()
+        return redirect(url_for('login'))
+   #Si ha pasado todos los pasos anteriores, el usuairo esta logueado correctamente podra continuar.
+    return render_template('dashboard.html', usuario=usuario_validado) #ademas he aniadido una variable usuario=usuario_validado para poder usarla dentro de el html...
 @app.route('/crear_servicio')
 def crear_servicio():
     return render_template('crear_servicio.html')
@@ -51,5 +61,9 @@ def registro():
         print("Nuevo usuario registrado exitosamente", username_form)
         return redirect(url_for('login'))
     return render_template('registro.html')
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=80, debug=True)
