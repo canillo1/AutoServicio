@@ -64,9 +64,7 @@ Actuando como un panel de control centralizado (Frontend web) y conectándose na
 ├── database.py           
 ├── proxmox_utils.py      
 ├── ssh_utils.py          
-├── templates/            
-│   ├── base.html         
-│   └── index.html        
+├── templates/                  
 └── static/              
     ├── css/             
     └── img/
