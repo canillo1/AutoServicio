@@ -52,6 +52,7 @@ Actuando como un panel de control centralizado (Frontend web) y conectándose na
 
 * **Checkpoint 1 (Revisión Inicial):** [Enlace al vídeo explicativo](https://drive.google.com/file/d/1dE1jUnHEGykeotOIbDYoQxmDQpUzn3dN/view?usp=sharing) 
 * **Documentacion (DRIVE)**[ENLACE DOCUMENTACION](https://docs.google.com/document/d/1da0W1-blvOcRLr9vKXel3__spJxI8hNTmVWjxqUPbpA/edit?usp=drive_link)
+* **Checkpoint 2 (Revisión 2):** [Enlace al video de checkpoint 2](https://youtu.be/g5xAuYVIswY)
 ---
 
 ## Estructura del Repositorio
