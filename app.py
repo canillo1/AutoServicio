@@ -1,8 +1,9 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session,flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from database import db,Departamento,CatalogoServicio,Usuario,RegistroDespliegue
 from dotenv import load_dotenv
+from proxmox_utils import obtener_servicios_activos
 load_dotenv()
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URI')
@@ -35,14 +36,28 @@ def dashboard():
     if not usuario_validado:
         session.clear()
         return redirect(url_for('login'))
-   #Si ha pasado todos los pasos anteriores, el usuairo esta logueado correctamente podra continuar.
+   #Si ha pasado todos los pasos anteriores, el usuario esta logueado correctamente podra continuar.
     return render_template('dashboard.html', usuario=usuario_validado) #ademas he aniadido una variable usuario=usuario_validado para poder usarla dentro de el html...
 @app.route('/crear_servicio')
 def crear_servicio():
     return render_template('crear_servicio.html')
-@app.route('/gestionar_servicio')
+@app.route('/gestionar_servicios')
 def gestion_servicio():
-    return render_template('gestionar_servicio.html')
+    # Si el usuario no ha iniciado sesion lo mandamos a login y ganamos en seguridad.
+    if 'nombre_usuario' not in session:
+        return redirect(url_for('login'))
+    # Vemos los servicios activos con la funcion del fichero proxmox_utils
+    try:
+        contenedores_activos = obtener_servicios_activos() # Asegúrate de que importaste esta función arriba
+        # Si esta vacia significa que no hay ninguno activo
+        if len(contenedores_activos) == 0:
+            flash('No se ha encontrado ningun servicio activo', 'warning')
+            return redirect(url_for('dashboard'))
+        # Si no esta vacio le pasamos los contenedores a la plantilla
+        return render_template('gestionar_servicio.html', contenedores=contenedores_activos)
+    except Exception as e:
+        flash('Error de conexion con Proxmox', 'danger')
+        return redirect(url_for('dashboard'))
 @app.route('/registro', methods=['GET', 'POST'])
 def registro():
     if request.method == 'POST':
