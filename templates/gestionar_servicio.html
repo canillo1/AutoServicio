@@ -36,14 +36,25 @@
                         <h4 class="my-0 fw-normal text-uppercase">{{ ct.name }}</h4>
                     </div>
                     <div class="card-body text-center">
-                        <ul class="list-unstyled mt-3 mb-4">
+                     <ul class="list-unstyled mt-3 mb-4">
                             <li><strong>ID Maquina (VMID):</strong> {{ ct.vmid }}</li>
-                            <li><strong>Estado:</strong> <span class="badge bg-success">Activo</span></li>
-                        </ul>                        
+                            <li><strong>Direccion IP:</strong> <span class="text-primary">{{ ct.ip_asignada }}</span></li>
+                            <li><strong>Estado:</strong> 
+                                {% if ct.status == 'running' %}
+                                    <span class="badge bg-success">Activo</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Apagado</span>
+                                {% endif %}
+                            </li>
+                        </ul>
                         <div class="d-grid gap-2">
                             <a href="/modificar/{{ ct.vmid }}" class="btn btn-outline-primary">Modificar Configuracion</a>
-                            <a href="/reiniciar/{{ ct.vmid }}" class="btn btn-outline-warning">Reiniciar</a>
-                            <a href="/apagar/{{ ct.vmid }}" class="btn btn-outline-danger">Apagar</a>
+                            {% if ct.status == 'running' %}
+                                <a href="/accion_servicio/reiniciar/{{ ct.vmid }}" class="btn btn-outline-warning">Reiniciar</a>
+                                <a href="/accion_servicio/parar/{{ ct.vmid }}" class="btn btn-outline-danger">Apagar</a>
+                            {% else %}
+                                <a href="/accion_servicio/iniciar/{{ ct.vmid }}" class="btn btn-outline-success">Iniciar</a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
