@@ -21,7 +21,7 @@ class SSHManager:
         cliente = paramiko.SSHClient()
         cliente.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         conectado = False
-        intentos = 3
+        intentos = 6
 
         for intento in range(intentos):
             try:
@@ -31,7 +31,7 @@ class SSHManager:
             except Exception as e:
                 logger.warning(f"Error en la conexion: {str(e)}")
                 if intento < intentos - 1:
-                    time.sleep(5)
+                    time.sleep(7)
         
         if not conectado:
             return False, "Error en ssh"
@@ -128,10 +128,6 @@ class SSHManager:
             cliente.close()
             logger.info(f"Conexion con {self.ip} cerrada.")
 
-    # ==========================================
-    # MÉTODOS DE SERVICIOS
-    # ==========================================
-
     def configurar_dhcp(self, red, mascara, ip_inicio, ip_fin, gateway, dns):
         logger.info("Preparando la inyeccion de DHCP")
         
@@ -148,7 +144,10 @@ subnet {red} netmask {mascara} {{
         lista_archivos = [{'ruta': '/etc/dhcp/dhcpd.conf', 'texto': texto_config}]
         comandos = ["systemctl restart isc-dhcp-server"]
         return self.inyectar_configuracion(lista_archivos, comandos)
-    def configurar_dns(self, red_permitida, nombre_dominio, ip_dns): logger.info(f"Iniciando inyeccion de configuracion DNS para {nombre_dominio}...")
+
+    def configurar_dns(self, red_permitida, nombre_dominio, ip_dns):
+        logger.info(f"Iniciando inyeccion de configuracion DNS para {nombre_dominio}...")
+
         opciones_globales = f"""acl "trusted" {{
     127.0.0.0/8;
     {red_permitida};
@@ -186,6 +185,7 @@ ns1     IN      A       {ip_dns}
             {'ruta': f'/var/lib/bind/db.{nombre_dominio}', 'texto': registros_zona}
         ]
         comandos = ["systemctl restart bind9"]
+        
         return self.inyectar_configuracion(lista_archivos, comandos)
 
     def aniadir_registro_dns(self, zona_dominio, nombre_host, tipo_registro, valor_destino, ttl):
@@ -197,14 +197,16 @@ ns1     IN      A       {ip_dns}
             "systemctl reload bind9"
         ]
         return self.conectar_y_ejecutar(comandos)
-    def eliminar_registro_dns(self,zona_dominio,nombre_host)
-	logger.info(f"Eliminando el host {nombre_host} del dominio {zona_dominio}...")
+
+    def eliminar_registro_dns(self, zona_dominio, nombre_host):
+        logger.info(f"Eliminando el host {nombre_host} del dominio {zona_dominio}...")
         archivo_zona = f"/var/lib/bind/db.{zona_dominio}"
         comandos = [
             f"sed -i '/^{nombre_host}/d' {archivo_zona}",
             "systemctl reload bind9"
         ]
         return self.conectar_y_ejecutar(comandos)
+
     def configurar_web(self, contenido_html, servicio_web="apache2"):
         logger.info(f"Iniciando inyeccion de configuracion Web ({servicio_web})...")
         ruta_index = "/var/www/html/index.html"
