@@ -41,7 +41,7 @@ def registro():
         token_form = request.form.get('IT_TOKEN')
         username_form = request.form.get('username')
         password_form = request.form.get('password')
-        if token_form != os.getenv('IT_TOKEN'):
+        if token_form != os.getenv('IT-TOKEN'):
             return render_template('registro.html', mensaje_error='Token invalido')
         usuario_existente = Usuario.query.filter_by(nombre_usuario=username_form).first()
         if usuario_existente:

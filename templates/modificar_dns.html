@@ -1,4 +1,4 @@
-<!0DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -40,7 +40,7 @@
                         <input type="number" name="ttl" class="form-control" value="3600" required>
                     </div>
                     
-                    <button type="submit" class="btn btn-primary mt-3">Inyectar Configuracion</button>
+                    <button type="submit" class="btn btn-primary mt-3" onclick="this.disabled=true; this.form.submit();">Inyectar Configuracion</button>
                     <a href="{{ url_for('gestion_servicio') }}" class="btn btn-secondary mt-3 ms-2">Cancelar</a>
                 </form>
             </div>

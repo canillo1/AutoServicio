@@ -49,7 +49,7 @@
                                 <label class="form-label etiqueta-negrita small">Tiempo de Concesion (seg)</label>
                                 <input type="number" name="dhcp_lease" class="form-control form-control-sm" value="86400">
                             </div>
-                            <button type="submit" class="btn btn-primary w-100 boton-principal">Desplegar DHCP</button>
+                            <button type="submit" class="btn btn-primary w-100 boton-principal" onclick="this.disabled=true; this.form.submit();">Desplegar DHCP</button>
                         </form>
                     </div>
                 </div>
@@ -85,7 +85,7 @@
                                 <label class="form-label etiqueta-negrita small">TTL (Segundos)</label>
                                 <input type="number" name="dns_ttl" class="form-control form-control-sm" value="3600">
                             </div>
-                            <button type="submit" class="btn btn-success w-100 boton-principal">Desplegar DNS</button>
+                            <button type="submit" class="btn btn-success w-100 boton-principal" onclick="this.disabled=true; this.form.submit();">Desplegar DNS</button>
                         </form>
                     </div>
                 </div>
@@ -113,7 +113,7 @@
                                 El sistema generara automaticamente el VirtualHost en Apache y asignara una IP disponible.
                             </div>
 
-                            <button type="submit" class="btn btn-dark w-100 boton-principal">Subir y Desplegar Web</button>
+                            <button type="submit" class="btn btn-dark w-100 boton-principal" onclick="this.disabled=true; this.form.submit();">Subir y Desplegar Web</button>
                         </form>
                     </div>
                 </div>

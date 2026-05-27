@@ -16,7 +16,7 @@
                     <input type="hidden" name="vmid" value="{{ vmid }}">
                     
                     <div class="alert alert-info">
-                        Sube un nuevo archivo <strong>index.html</strong>. Este reemplazara al actual y reiniciará el servicio Apache2 automaticamente.
+                        Sube un nuevo archivo <strong>index.html</strong>. Este reemplazara al actual y reiniciara el servicio Apache2 automaticamente.
                     </div>
                     
                     <div class="mb-4">
@@ -24,7 +24,7 @@
                         <input type="file" name="fichero_html" class="form-control" accept=".html" required>
                     </div>
                     
-                    <button type="submit" class="btn btn-success">Actualizar Web</button>
+                    <button type="submit" class="btn btn-success" onclick="this.disabled=true; this.form.submit();">Actualizar Web</button>
                     <a href="{{ url_for('gestion_servicio') }}" class="btn btn-secondary ms-2">Cancelar</a>
                 </form>
             </div>
