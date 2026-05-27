@@ -2,61 +2,81 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestionar Servicios - AutoServicio</title>
+    <title>Tus Servicios Activos</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
 
-    <nav class="navbar navbar-dark bg-dark shadow-sm">
-        <div class="container-fluid px-4 d-flex justify-content-between align-items-center">
-            <span class="navbar-text text-white">
-                Usuario: <strong>{{ session.nombre_usuario }}</strong>
-            </span>
-            <div>
-                <a href="/dashboard" class="btn btn-outline-info btn-sm me-2">Volver al Dashboard</a>
-                <a href="/logout" class="btn btn-outline-light btn-sm">Cerrar Sesion</a>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('dashboard') }}">AutoServicio Panel</a>
+            <div class="d-flex">
+                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light me-2">Volver al Inicio</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-danger">Cerrar Sesion</a>
             </div>
         </div>
     </nav>
 
-    <div class="container mt-5">
-        <div class="row text-center mb-4">
-            <div class="col-12">
-                <h1 class="display-5 fw-bold">Tus Servicios Activos</h1>
-                <p class="lead text-muted">Panel de control de la infraestructura en ejecucion.</p>
-            </div>
+    <div class="container">
+        <div class="text-center mb-5">
+            <h1 class="display-5 fw-bold text-dark">Tus Servicios Activos</h1>
+            <p class="text-muted fs-5">Panel de control de la infraestructura en ejecucion.</p>
         </div>
 
-        <div class="row justify-content-center g-4">
-            {% for ct in contenedores %}
-            <div class="col-md-4">
-                <div class="card h-100 shadow-sm border-success">
-                    <div class="card-header bg-success text-white text-center">
-                        <h4 class="my-0 fw-normal text-uppercase">{{ ct.name }}</h4>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
-                    <div class="card-body text-center">
-                     <ul class="list-unstyled mt-3 mb-4">
-                            <li><strong>ID Maquina (VMID):</strong> {{ ct.vmid }}</li>
-                            <li><strong>Direccion IP:</strong> <span class="text-primary">{{ ct.ip_asignada }}</span></li>
-                            <li><strong>Estado:</strong> 
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="row">
+            {% for ct in contenedores %}
+            <div class="col-md-4 mb-4">
+                <div class="card shadow border-success h-100">
+                    <div class="card-header bg-success text-white text-center text-uppercase fw-bold fs-5">
+                        {{ ct.name | default('SRV-UNKNOWN-' ~ ct.vmid) }}
+                    </div>
+                    
+                    <div class="card-body text-center d-flex flex-column">
+                        <div class="mb-4">
+                            <p class="mb-2 fw-bold text-dark">ID Maquina (VMID): <span class="fw-normal text-secondary">{{ ct.vmid }}</span></p>
+                            <p class="mb-2 fw-bold text-dark">Direccion IP: 
+                                <a href="http://{{ ct.ip_asignada }}" target="_blank" class="fw-normal text-primary text-decoration-none">{{ ct.ip_asignada }}</a>
+                            </p>
+                            <p class="mb-0 fw-bold text-dark">Estado: 
                                 {% if ct.status == 'running' %}
                                     <span class="badge bg-success">Activo</span>
                                 {% else %}
-                                    <span class="badge bg-secondary">Apagado</span>
+                                    <span class="badge bg-danger">Apagado</span>
                                 {% endif %}
-                            </li>
-                        </ul>
-                        <div class="d-grid gap-2">
-                            <a href="/modificar/{{ ct.vmid }}" class="btn btn-outline-primary">Modificar Configuracion</a>
+                            </p>
+                        </div>
+                        
+                        <div class="mt-auto d-grid gap-2">
                             {% if ct.status == 'running' %}
-                                <a href="/accion_servicio/reiniciar/{{ ct.vmid }}" class="btn btn-outline-warning">Reiniciar</a>
-                                <a href="/accion_servicio/parar/{{ ct.vmid }}" class="btn btn-outline-danger">Apagar</a>
+                                <a href="{{ url_for('modificar_servicio', vmid=ct.vmid) }}" class="btn btn-outline-primary">Modificar Configuracion</a>
+                                <a href="{{ url_for('accion_servicio', accion='reiniciar', vmid=ct.vmid) }}" class="btn btn-outline-warning">Reiniciar</a>
+                                <a href="{{ url_for('accion_servicio', accion='parar', vmid=ct.vmid) }}" class="btn btn-outline-danger">Apagar</a>
                             {% else %}
-                                <a href="/accion_servicio/iniciar/{{ ct.vmid }}" class="btn btn-outline-success">Iniciar</a>
+                                <button class="btn btn-outline-secondary" disabled>Modificar Configuracion</button>
+                                <a href="{{ url_for('accion_servicio', accion='iniciar', vmid=ct.vmid) }}" class="btn btn-outline-success">Iniciar Servidor</a>
                             {% endif %}
                         </div>
                     </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="col-12 text-center">
+                <div class="alert alert-info shadow-sm p-4">
+                    <h4 class="alert-heading">Sin servicios activos</h4>
+                    <p>Actualmente no tienes ninguna maquina desplegada en tu cuenta.</p>
+                    <hr>
+                    <a href="{{ url_for('crear_servicio') }}" class="btn btn-primary">Desplegar Nuevo Servicio</a>
                 </div>
             </div>
             {% endfor %}

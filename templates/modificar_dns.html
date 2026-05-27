@@ -1,0 +1,50 @@
+<!0DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Modificar DNS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h3 class="mb-0">Aniadir Registro DNS - Servidor {{ vmid }}</h3>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('modificar_dns') }}" method="POST">
+                    <input type="hidden" name="vmid" value="{{ vmid }}">
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Zona del Dominio</label>
+                        <input type="text" name="zona_dominio" class="form-control" placeholder="ej. midominio.local" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nombre del Host</label>
+                        <input type="text" name="nombre_host" class="form-control" placeholder="ej. www o ftp" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Tipo de Registro</label>
+                        <select name="tipo_registro" class="form-select" required>
+                            <option value="A">A (Direccion IPv4)</option>
+                            <option value="CNAME">CNAME (Alias)</option>
+                            <option value="TXT">TXT (Texto)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Valor Destino</label>
+                        <input type="text" name="valor_destino" class="form-control" placeholder="IP o Dominio de destino" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">TTL (Segundos)</label>
+                        <input type="number" name="ttl" class="form-control" value="3600" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary mt-3">Inyectar Configuracion</button>
+                    <a href="{{ url_for('gestion_servicio') }}" class="btn btn-secondary mt-3 ms-2">Cancelar</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

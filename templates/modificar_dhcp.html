@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Modificar DHCP</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <div class="card shadow">
+            <div class="card-header bg-warning text-dark">
+                <h3 class="mb-0">Modificar Rango DHCP - Servidor {{ vmid }}</h3>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('modificar_dhcp') }}" method="POST">
+                    <input type="hidden" name="vmid" value="{{ vmid }}">
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">IP de Inicio</label>
+                            <input type="text" name="dhcp_inicio" class="form-control" placeholder="192.168.100.50" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">IP de Fin</label>
+                            <input type="text" name="dhcp_fin" class="form-control" placeholder="192.168.100.150" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Mascara de Subred</label>
+                        <input type="text" name="dhcp_mascara" class="form-control" placeholder="255.255.255.0" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Puerta de Enlace (Gateway)</label>
+                        <input type="text" name="dhcp_gateway" class="form-control" placeholder="192.168.100.1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Servidor DNS principal</label>
+                        <input type="text" name="dhcp_dns" class="form-control" placeholder="8.8.8.8" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-warning mt-3">Aplicar Nuevo Rango</button>
+                    <a href="{{ url_for('gestion_servicio') }}" class="btn btn-secondary mt-3 ms-2">Cancelar</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

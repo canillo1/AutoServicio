@@ -1,8 +1,10 @@
 import paramiko
 import time
 import logging
+import os
+from dotenv import load_dotenv
 
-# Configuracion basica del logger
+ #Configuracion basica del logger
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
@@ -10,31 +12,41 @@ class SSHManager:
     def __init__(self, ip, username="root", password=None):
         self.ip = ip
         self.username = username
-        self.password = password
+        self.password = password or os.getenv('SSH_PASS')
         self.port = 22
-        self.timeout = 10
+        self.timeout = 15
 
     def conectar_y_ejecutar(self, comandos):
-        """
-        Ejecuta comandos simples sin transferir archivos (ideal para añadir registros al DNS)
-        """
         cliente = paramiko.SSHClient()
         cliente.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         conectado = False
-        intentos = 6
+        intentos = 5
 
         for intento in range(intentos):
             try:
-                cliente.connect(hostname=self.ip, port=self.port, username=self.username, password=self.password, timeout=self.timeout)
+                logger.info(f"Intentando conectar a {self.ip} con usuario {self.username}... (Intento {intento+1}/{intentos})")
+                cliente.connect(
+                    hostname=self.ip, 
+                    port=self.port, 
+                    username=self.username, 
+                    password=self.password, 
+                    timeout=self.timeout,
+                    look_for_keys=False, 
+                    allow_agent=False
+                )
                 conectado = True
+                logger.info("¡Conexion SSH establecida con exito!")
                 break
+            except paramiko.AuthenticationException:
+                logger.error(f"FALLO DE AUTENTICACION: La contrasena para root es rechazada por {self.ip}")
+                return False, "Error: Contrasena incorrecta"
             except Exception as e:
-                logger.warning(f"Error en la conexion: {str(e)}")
+                logger.warning(f"Fallo de conexion en intento {intento+1}: {str(e)}")
                 if intento < intentos - 1:
                     time.sleep(7)
         
         if not conectado:
-            return False, "Error en ssh"
+            return False, "Error en ssh: Timeout o red inalcanzable"
 
         exito_total = True
         resultados = []
@@ -57,42 +69,43 @@ class SSHManager:
             cliente.close()
 
     def inyectar_configuracion(self, archivos, comandos_post):
-        """
-        Conecta por SFTP, sube los archivos de configuracion y ejecuta comandos de reinicio.
-        'archivos' debe ser una lista de diccionarios con 'ruta' y 'texto'.
-        """
         cliente = paramiko.SSHClient()
         cliente.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        intentos = 3
+        intentos = 5
         conectado = False
         
         for intento in range(intentos):
             try:
-                logger.info(f"Conectando a {self.ip} Intento numero {intento+1}/{intentos}")
+                logger.info(f"Conectando por SFTP a {self.ip} (Intento {intento+1}/{intentos})")
                 cliente.connect(
                     hostname=self.ip,
                     port=self.port,
                     username=self.username,
                     password=self.password,
-                    timeout=self.timeout
+                    timeout=self.timeout,
+                    look_for_keys=False, 
+                    allow_agent=False
                 )
                 conectado = True
+                logger.info("¡Conexion SFTP establecida con exito!")
                 break
+            except paramiko.AuthenticationException:
+                logger.error(f"FALLO DE AUTENTICACION SFTP: La contrasena para root es rechazada por {self.ip}")
+                return False, "Error: Contrasena incorrecta"
             except Exception as e:
-                logger.warning(f"Error en la conexion: {str(e)}")
+                logger.warning(f"Error de conexion SFTP en intento {intento+1}: {str(e)}")
                 if intento < intentos - 1:
-                    time.sleep(5)
+                    time.sleep(7)
                     
         if not conectado:
             logger.error(f"No es posible conectar a {self.ip}")
-            return False, "Error en ssh"
+            return False, "Error en ssh: Timeout o red inalcanzable"
             
         exito_total = True
         resultados = []
         
         try:
             sftp = cliente.open_sftp()
-            # Bucle para subir todos los archivos necesarios (1 para DHCP, 3 para DNS)
             for archivo in archivos:
                 ruta_destino = archivo['ruta']
                 contenido = archivo['texto']
@@ -172,7 +185,7 @@ zone "{nombre_dominio}" {{
 @       IN      SOA     ns1.{nombre_dominio}. admin.{nombre_dominio}. (
                               1         ; Serial
                          604800         ; Refresh
-                          86400         ; Retry
+                          86400         ; Retry   
                         2419200         ; Expire
                          604800 )       ; Negative Cache TTL
 ;
@@ -189,7 +202,7 @@ ns1     IN      A       {ip_dns}
         return self.inyectar_configuracion(lista_archivos, comandos)
 
     def aniadir_registro_dns(self, zona_dominio, nombre_host, tipo_registro, valor_destino, ttl):
-        logger.info(f"Añadiendo registro a {zona_dominio}: {nombre_host} -> {valor_destino}")
+        logger.info(f"Anadiendo registro a {zona_dominio}: {nombre_host} -> {valor_destino}")
         registro = f"{nombre_host}    {ttl}    IN    {tipo_registro}    {valor_destino}"
         archivo_zona = f"/var/lib/bind/db.{zona_dominio}"
         comandos = [
