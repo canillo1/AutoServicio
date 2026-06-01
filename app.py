@@ -88,24 +88,14 @@ def crear_servicio():
         nuevo_id_lxc = obtener_id_lxc_libre()
         ip_en_uso = [r.ip_asignada for r in RegistroDespliegue.query.all() if r.ip_asignada]
         nueva_ip = obtener_ip_libre(ip_en_uso)
-        contenido_html = "<h1>Servidor Web Autoservicio</h1>"
-        ruta_css = None
         
+        # Recuperamos los archivos en memoria antes del clonado
+        ficheros_html = []
+        fichero_css = None
         if tipo_servicio == 'web':
-            fichero_html = request.files.get('fichero_html')
+            ficheros_html = request.files.getlist('ficheros_html')
             fichero_css = request.files.get('fichero_css')
-            if fichero_html and fichero_html.filename != '':
-                nombre_html = secure_filename(fichero_html.filename)
-                ruta_html = os.path.join(app.config['FICHERO_DESCARGADO'], str(nuevo_id_lxc), nombre_html)
-                os.makedirs(os.path.dirname(ruta_html), exist_ok=True)
-                fichero_html.save(ruta_html)
-                with open(ruta_html, 'r', encoding='utf-8') as f:
-                    contenido_html = f.read()
-            if fichero_css and fichero_css.filename != '':
-                nombre_css = secure_filename(fichero_css.filename)
-                ruta_css = os.path.join(app.config['FICHERO_DESCARGADO'], str(nuevo_id_lxc), nombre_css)
-                fichero_css.save(ruta_css)
-                
+        
         proxmox = conectar_proxmox()
         proxmox.nodes('alejandro').lxc(id_lxc_origen).clone.post(
             newid=nuevo_id_lxc,
@@ -154,11 +144,35 @@ def crear_servicio():
                 exito_ssh, logs_ssh = orquestador.aniadir_registro_dns(zona, host, tipo, valor, ttl)
                 
         elif tipo_servicio == 'web':
-            lista_archivos_web = [{'ruta': '/var/www/html/index.html', 'texto': contenido_html}]
-            if ruta_css:
+            lista_archivos_web = []
+            
+            # Iteramos sobre todos los archivos HTML subidos
+            for fichero in ficheros_html:
+                if fichero and fichero.filename != '':
+                    nombre_html = secure_filename(fichero.filename)
+                    ruta_html = os.path.join(app.config['FICHERO_DESCARGADO'], str(nuevo_id_lxc), nombre_html)
+                    os.makedirs(os.path.dirname(ruta_html), exist_ok=True)
+                    fichero.save(ruta_html)
+                    
+                    with open(ruta_html, 'r', encoding='utf-8') as f:
+                        contenido = f.read()
+                        
+                    lista_archivos_web.append({
+                        'ruta': f'/var/www/html/{nombre_html}', 
+                        'texto': contenido
+                    })
+                    
+            if fichero_css and fichero_css.filename != '':
+                nombre_css = secure_filename(fichero_css.filename)
+                ruta_css = os.path.join(app.config['FICHERO_DESCARGADO'], str(nuevo_id_lxc), nombre_css)
+                fichero_css.save(ruta_css)
                 with open(ruta_css, 'r', encoding='utf-8') as f:
                     contenido_css = f.read()
-                    lista_archivos_web.append({'ruta': '/var/www/html/estilos.css', 'texto': contenido_css})
+                lista_archivos_web.append({
+                    'ruta': f'/var/www/html/{nombre_css}', 
+                    'texto': contenido_css
+                })
+                
             comandos_web = ["systemctl restart apache2"]
             exito_ssh, logs_ssh = orquestador.inyectar_configuracion(lista_archivos_web, comandos_web)
             
@@ -302,25 +316,37 @@ def modificar_web():
         return redirect(url_for('login'))
         
     vmid = request.form.get('vmid')
-    fichero_html = request.files.get('fichero_html')
+    ficheros_html = request.files.getlist('ficheros_html')
     
     try:
         usuario_actual = Usuario.query.filter_by(nombre_usuario=session['nombre_usuario']).first()
         registro = RegistroDespliegue.query.filter_by(id_usuario=usuario_actual.id_usuario, vmid_proxmox=vmid, estado='ACTIVO').first()
         
-        if not registro or not fichero_html or fichero_html.filename == '':
+        if not registro or not ficheros_html:
             flash("Acceso denegado o no se proporcionó archivo.", "danger")
             return redirect(url_for('gestion_servicio'))
 
-        nombre_html = secure_filename(fichero_html.filename)
-        ruta_html = os.path.join(app.config['FICHERO_DESCARGADO'], str(vmid), "update_" + nombre_html)
-        os.makedirs(os.path.dirname(ruta_html), exist_ok=True)
-        fichero_html.save(ruta_html)
-        
-        with open(ruta_html, 'r', encoding='utf-8') as f:
-            contenido_html = f.read()
+        lista_archivos_web = []
 
-        lista_archivos_web = [{'ruta': '/var/www/html/index.html', 'texto': contenido_html}]
+        for fichero in ficheros_html:
+            if fichero and fichero.filename != '':
+                nombre_html = secure_filename(fichero.filename)
+                ruta_html = os.path.join(app.config['FICHERO_DESCARGADO'], str(vmid), "update_" + nombre_html)
+                os.makedirs(os.path.dirname(ruta_html), exist_ok=True)
+                fichero.save(ruta_html)
+                
+                with open(ruta_html, 'r', encoding='utf-8') as f:
+                    contenido = f.read()
+
+                lista_archivos_web.append({
+                    'ruta': f'/var/www/html/{nombre_html}', 
+                    'texto': contenido
+                })
+
+        if not lista_archivos_web:
+            flash("No se ha proporcionado ningun fichero HTML valido.", "warning")
+            return redirect(url_for('gestion_servicio'))
+
         comandos_web = ["systemctl restart apache2"]
         
         orquestador = SSHManager(ip=registro.ip_asignada, password=os.getenv("SSH_PASS"))
@@ -369,5 +395,6 @@ def modificar_dhcp():
     except Exception as e:
         flash("Error interno procesando la solicitud DHCP.", "danger")
     return redirect(url_for('gestion_servicio'))
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80, debug=True)
