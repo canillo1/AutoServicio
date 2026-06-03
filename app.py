@@ -21,7 +21,6 @@ os.makedirs(app.config['FICHERO_DESCARGADO'], exist_ok=True)
 @app.route('/')
 def index():
     return redirect(url_for('login'))
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -34,14 +33,13 @@ def login():
         else:
             return render_template('login.html', mensaje_error='Usuario o contrasena invalidos.')
     return render_template('login.html')
-
 @app.route('/registro', methods=['GET', 'POST'])
 def registro():
     if request.method == 'POST':
-        token_form = request.form.get('IT_TOKEN')
+        token_form = request.form.get('IT-TOKEN')
         username_form = request.form.get('username')
         password_form = request.form.get('password')
-        if token_form != os.getenv('IT-TOKEN'):
+        if token_form != os.getenv('IT_TOKEN'):
             return render_template('registro.html', mensaje_error='Token invalido')
         usuario_existente = Usuario.query.filter_by(nombre_usuario=username_form).first()
         if usuario_existente:
@@ -52,12 +50,10 @@ def registro():
         db.session.commit()
         return redirect(url_for('login'))
     return render_template('registro.html')
-
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('login'))
-
 @app.route('/dashboard')
 def dashboard():
     if 'nombre_usuario' not in session:
@@ -68,18 +64,15 @@ def dashboard():
         session.clear()
         return redirect(url_for('login'))
     return render_template('dashboard.html', usuario=usuario_validado)
-
 @app.route('/crear_servicio', methods=['GET', 'POST'])
 def crear_servicio():
     if 'nombre_usuario' not in session:
         return redirect(url_for('login'))
     if request.method == 'GET':
         return render_template('crear_servicio.html')
-        
     tipo_servicio = request.form.get('servicio')    
     plantillas_proxmox = { 'dhcp': 1000, 'dns': 1001, 'web': 1002}
     id_lxc_origen = plantillas_proxmox.get(tipo_servicio)
-    
     if not id_lxc_origen:
         flash('Este servicio no se ha encontrado', 'danger')
         return redirect(url_for('dashboard'))
@@ -88,14 +81,24 @@ def crear_servicio():
         nuevo_id_lxc = obtener_id_lxc_libre()
         ip_en_uso = [r.ip_asignada for r in RegistroDespliegue.query.all() if r.ip_asignada]
         nueva_ip = obtener_ip_libre(ip_en_uso)
+        contenido_html = "<h1>Servidor Web Autoservicio</h1>"
+        ruta_css = None
         
-        # Recuperamos los archivos en memoria antes del clonado
-        ficheros_html = []
-        fichero_css = None
         if tipo_servicio == 'web':
-            ficheros_html = request.files.getlist('ficheros_html')
+            fichero_html = request.files.get('fichero_html')
             fichero_css = request.files.get('fichero_css')
-        
+            if fichero_html and fichero_html.filename != '':
+                nombre_html = secure_filename(fichero_html.filename)
+                ruta_html = os.path.join(app.config['FICHERO_DESCARGADO'], str(nuevo_id_lxc), nombre_html)
+                os.makedirs(os.path.dirname(ruta_html), exist_ok=True)
+                fichero_html.save(ruta_html)
+                with open(ruta_html, 'r', encoding='utf-8') as f:
+                    contenido_html = f.read()
+            if fichero_css and fichero_css.filename != '':
+                nombre_css = secure_filename(fichero_css.filename)
+                ruta_css = os.path.join(app.config['FICHERO_DESCARGADO'], str(nuevo_id_lxc), nombre_css)
+                fichero_css.save(ruta_css)
+                
         proxmox = conectar_proxmox()
         proxmox.nodes('alejandro').lxc(id_lxc_origen).clone.post(
             newid=nuevo_id_lxc,
@@ -144,9 +147,13 @@ def crear_servicio():
                 exito_ssh, logs_ssh = orquestador.aniadir_registro_dns(zona, host, tipo, valor, ttl)
                 
         elif tipo_servicio == 'web':
+            # 1. Usamos getlist para recoger todos los archivos del formulario
+            ficheros_html = request.files.getlist('ficheros_html')
+            fichero_css = request.files.get('fichero_css')
+            
             lista_archivos_web = []
             
-            # Iteramos sobre todos los archivos HTML subidos
+            # 2. Recorremos cada archivo HTML subido
             for fichero in ficheros_html:
                 if fichero and fichero.filename != '':
                     nombre_html = secure_filename(fichero.filename)
@@ -157,17 +164,21 @@ def crear_servicio():
                     with open(ruta_html, 'r', encoding='utf-8') as f:
                         contenido = f.read()
                         
+                    # Añadimos a la lista respetando el nombre original del archivo
                     lista_archivos_web.append({
                         'ruta': f'/var/www/html/{nombre_html}', 
                         'texto': contenido
                     })
                     
+            # 3. Procesamos el CSS si existe
             if fichero_css and fichero_css.filename != '':
                 nombre_css = secure_filename(fichero_css.filename)
                 ruta_css = os.path.join(app.config['FICHERO_DESCARGADO'], str(nuevo_id_lxc), nombre_css)
                 fichero_css.save(ruta_css)
+                
                 with open(ruta_css, 'r', encoding='utf-8') as f:
                     contenido_css = f.read()
+                    
                 lista_archivos_web.append({
                     'ruta': f'/var/www/html/{nombre_css}', 
                     'texto': contenido_css
@@ -175,7 +186,6 @@ def crear_servicio():
                 
             comandos_web = ["systemctl restart apache2"]
             exito_ssh, logs_ssh = orquestador.inyectar_configuracion(lista_archivos_web, comandos_web)
-            
         if not exito_ssh:
             raise Exception(f"Fallo en la inyeccion SSH: {logs_ssh}")
             
@@ -199,7 +209,6 @@ def crear_servicio():
         db.session.rollback()
         flash(f"Error en el despliegue del servicio: {str(e)}", "danger")
         return redirect(url_for('dashboard'))
-
 @app.route('/gestionar_servicios')
 def gestion_servicio():
     if 'nombre_usuario' not in session:
@@ -222,7 +231,6 @@ def gestion_servicio():
     except Exception as e:
         flash('Error al obtener la lista de tus servicios.', 'danger')
         return redirect(url_for('dashboard'))
-
 @app.route('/accion_servicio/<accion>/<int:vmid>')
 def accion_servicio(accion, vmid):
     if 'nombre_usuario' not in session:
@@ -253,21 +261,16 @@ def accion_servicio(accion, vmid):
         flash(f'Error al intentar {accion} el servicio', 'danger')
     time.sleep(10)
     return redirect(url_for('gestion_servicio'))
-
 @app.route('/modificar_servicio/<int:vmid>')
 def modificar_servicio(vmid):
     if 'nombre_usuario' not in session:
         return redirect(url_for('login'))
-
     usuario_actual = Usuario.query.filter_by(nombre_usuario=session['nombre_usuario']).first()
     registro = RegistroDespliegue.query.filter_by(id_usuario=usuario_actual.id_usuario, vmid_proxmox=vmid, estado='ACTIVO').first()
-
     if not registro:
         flash('Servicio no encontrado o no esta activo.', 'danger')
         return redirect(url_for('gestion_servicio'))
-
     servicio = CatalogoServicio.query.get(registro.id_servicio)
-
     if servicio.nombre_servicio == 'dns':
         return render_template('modificar_dns.html', vmid=vmid, ip=registro.ip_asignada)
     elif servicio.nombre_servicio == 'web':
@@ -277,7 +280,6 @@ def modificar_servicio(vmid):
     else:
         flash('Modificacion no soportada para este servicio.', 'warning')
         return redirect(url_for('gestion_servicio'))
-
 @app.route('/modificar/dns', methods=['POST'])
 def modificar_dns():
     if 'nombre_usuario' not in session:
@@ -289,7 +291,6 @@ def modificar_dns():
     tipo_registro = request.form.get('tipo_registro')
     valor_destino = request.form.get('valor_destino')
     ttl = request.form.get('ttl', '3600')
-
     try:
         usuario_actual = Usuario.query.filter_by(nombre_usuario=session['nombre_usuario']).first()
         registro = RegistroDespliegue.query.filter_by(id_usuario=usuario_actual.id_usuario, vmid_proxmox=vmid, estado='ACTIVO').first()
@@ -309,49 +310,33 @@ def modificar_dns():
         flash("Error interno procesando la solicitud DNS.", "danger")
         
     return redirect(url_for('gestion_servicio'))
-
 @app.route('/modificar/web', methods=['POST'])
 def modificar_web():
     if 'nombre_usuario' not in session:
         return redirect(url_for('login'))
         
     vmid = request.form.get('vmid')
-    ficheros_html = request.files.getlist('ficheros_html')
+    fichero_html = request.files.get('fichero_html')
     
     try:
         usuario_actual = Usuario.query.filter_by(nombre_usuario=session['nombre_usuario']).first()
         registro = RegistroDespliegue.query.filter_by(id_usuario=usuario_actual.id_usuario, vmid_proxmox=vmid, estado='ACTIVO').first()
         
-        if not registro or not ficheros_html:
+        if not registro or not fichero_html or fichero_html.filename == '':
             flash("Acceso denegado o no se proporcionó archivo.", "danger")
             return redirect(url_for('gestion_servicio'))
-
-        lista_archivos_web = []
-
-        for fichero in ficheros_html:
-            if fichero and fichero.filename != '':
-                nombre_html = secure_filename(fichero.filename)
-                ruta_html = os.path.join(app.config['FICHERO_DESCARGADO'], str(vmid), "update_" + nombre_html)
-                os.makedirs(os.path.dirname(ruta_html), exist_ok=True)
-                fichero.save(ruta_html)
-                
-                with open(ruta_html, 'r', encoding='utf-8') as f:
-                    contenido = f.read()
-
-                lista_archivos_web.append({
-                    'ruta': f'/var/www/html/{nombre_html}', 
-                    'texto': contenido
-                })
-
-        if not lista_archivos_web:
-            flash("No se ha proporcionado ningun fichero HTML valido.", "warning")
-            return redirect(url_for('gestion_servicio'))
-
+        nombre_html = secure_filename(fichero_html.filename)
+        ruta_html = os.path.join(app.config['FICHERO_DESCARGADO'], str(vmid), "update_" + nombre_html)
+        os.makedirs(os.path.dirname(ruta_html), exist_ok=True)
+        fichero_html.save(ruta_html)
+        
+        with open(ruta_html, 'r', encoding='utf-8') as f:
+            contenido_html = f.read()
+        lista_archivos_web = [{'ruta': '/var/www/html/index.html', 'texto': contenido_html}]
         comandos_web = ["systemctl restart apache2"]
         
         orquestador = SSHManager(ip=registro.ip_asignada, password=os.getenv("SSH_PASS"))
         exito, resultado = orquestador.inyectar_configuracion(lista_archivos_web, comandos_web)
-
         if exito:
             flash("Pagina web actualizada correctamente.", "success")
         else:
@@ -361,7 +346,6 @@ def modificar_web():
         flash("Error interno procesando la solicitud Web.", "danger")
         
     return redirect(url_for('gestion_servicio'))
-
 @app.route('/modificar/dhcp', methods=['POST'])
 def modificar_dhcp():
     if 'nombre_usuario' not in session:
@@ -373,7 +357,6 @@ def modificar_dhcp():
     mask_net = request.form.get('dhcp_mascara')
     gw = request.form.get('dhcp_gateway')
     dns_srv = request.form.get('dhcp_dns')
-
     try:
         usuario_actual = Usuario.query.filter_by(nombre_usuario=session['nombre_usuario']).first()
         registro = RegistroDespliegue.query.filter_by(id_usuario=usuario_actual.id_usuario, vmid_proxmox=vmid, estado='ACTIVO').first()
@@ -381,13 +364,11 @@ def modificar_dhcp():
         if not registro:
             flash("Acceso denegado al servidor DHCP.", "danger")
             return redirect(url_for('gestion_servicio'))
-
         red_obj = ipaddress.IPv4Network(f"{gw}/{mask_net}", strict=False)
         red_net = str(red_obj.network_address)
         
         orquestador = SSHManager(ip=registro.ip_asignada, password=os.getenv("SSH_PASS"))
         exito, resultado = orquestador.configurar_dhcp(red_net, mask_net, ip_ini, ip_f, gw, dns_srv)
-
         if exito:
             flash("Rango DHCP modificado y reiniciado correctamente.", "success")
         else:
@@ -395,6 +376,5 @@ def modificar_dhcp():
     except Exception as e:
         flash("Error interno procesando la solicitud DHCP.", "danger")
     return redirect(url_for('gestion_servicio'))
-
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80, debug=True)
