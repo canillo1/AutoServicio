@@ -53,7 +53,8 @@ Actuando como un panel de control centralizado (Frontend web) y conectándose na
 * **Checkpoint 1 (Revisión Inicial):** [Enlace al vídeo explicativo](https://youtu.be/DAk_RvIIrWM) 
 * **Documentacion (DRIVE)**[ENLACE DOCUMENTACION](https://docs.google.com/document/d/1da0W1-blvOcRLr9vKXel3__spJxI8hNTmVWjxqUPbpA/edit?usp=drive_link)
 * **Checkpoint 2 (Revisión 2):** [Enlace al video de checkpoint 2](https://youtu.be/g5xAuYVIswY)
-* **Video de demostracion final** (https://youtu.be/C2137tweMYo?is=oh7gvVifl3muJ69a)[enlace]
+* **Video de demostracion final** [Enlace](https://youtu.be/C2137tweMYo?is=oh7gvVifl3muJ69a)
+* **Video de presentacion dual + proyecto de IPE** [Enlace](https://youtu.be/NdWLSrEPbQc)
 ---
 
 ## Estructura del Repositorio
